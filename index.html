@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRWCMS Pro: Ultimate Variation Analytics Tool</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        @keyframes panBackground {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        body { 
+            font-family: 'Times New Roman', Times, serif;
+            padding: 20px;
+            margin: auto;
+            background: linear-gradient(135deg, rgba(244, 241, 234, 0.92), rgba(214, 224, 230, 0.92)), 
+                        url('https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Indian_Railways_WAP-4_class_electric_locomotive.jpg/1024px-Indian_Railways_WAP-4_class_electric_locomotive.jpg');
+            background-size: cover; 
+            background-attachment: fixed;
+            animation: panBackground 40s infinite alternate linear;
+            color: #2c3338;
+            user-select: none; -webkit-user-select: none; -ms-user-select: none;
+        }
+
+        .main-wrapper {
+            max-width: 1400px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .header-container {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.85); padding: 12px 25px; 
+            border-radius: 8px; backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 25px; 
+        }
+
+        .ir-logo, .vb-image { height: 65px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .vb-image { border-radius: 8px; object-fit: cover; }
+        
+        .upload-zone {
+            border: 2px dashed #0d6efd; background: rgba(255,255,255,0.95); border-radius: 8px;
+            padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-family: 'Segoe UI', sans-serif;
+        }
+        .upload-zone:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .upload-icon { font-size: 3.5rem; color: #0d6efd; margin-bottom: 15px; }
+
+        .card { 
+            border: 1px solid rgba(255, 255, 255, 0.4); 
+            padding: 20px; 
+            border-radius: 8px; 
+            background-color: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(10px); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06); 
+        }
+        
+        .kpi-card { color: #fff; border: none; }
+        .bg-ca { background: linear-gradient(135deg, #1e3799, #4a69bd); }
+        .bg-prop { background: linear-gradient(135deg, #079992, #38ada9); }
+        .bg-new { background: linear-gradient(135deg, #b71540, #e55039); }
+        .bg-var { background: linear-gradient(135deg, #d35400, #e67e22); }
+        
+        .card-value { font-size: 1.8rem; font-weight: 700; margin-bottom: 0; font-family: 'Segoe UI', sans-serif; }
+        .card-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; opacity: 0.9; }
+
+        .chart-container { position: relative; height: 300px; width: 100%; }
+
+        .nav-tabs .nav-link { font-weight: bold; color: #576574; background: rgba(255,255,255,0.7); margin-right: 5px; border-radius: 8px 8px 0 0; }
+        .nav-tabs .nav-link.active { color: #0d6efd; border-bottom: 3px solid #0d6efd; background: rgba(255,255,255,1); }
+        .nav-tabs .nav-link.ai-tab { color: #fff; background: #05c46b; border: none; }
+        
+        .table-responsive, .ai-container { background: rgba(255,255,255,1); padding: 20px; border-radius: 0 8px 8px 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); user-select: text; -webkit-user-select: text; -ms-user-select: text; }
+        .table thead th { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle; background-color: #3b4c58 !important; color: #fff !important; }
+        table.dataTable { border-collapse: collapse !important; width: 100% !important; font-size: 14px; }
+        
+        .hidden { display: none !important; }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-box { background: #fff; padding: 30px; border-radius: 8px; max-width: 800px; width: 95%; max-height: 85vh; overflow-y: auto; }
+        
+        .global-alert { border-radius: 8px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 15px; margin-bottom: 20px; text-align: center; }
+        .alert-critical { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-warning-sa { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        
+        <div class="header-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/d/de/Indian_railways_18_star_logo.jpg" class="ir-logo" alt="IR Logo">
+            <h2 class="fw-bold mb-0 text-dark text-center" style="letter-spacing: 1px; color: #3b4c58;">IRWCMS PRO <br><span class="fs-5 text-muted">Variation & Concurrence Analytics</span></h2>
+            <img src="https://w7.pngwing.com/pngs/380/346/png-transparent-vande-bharath-express-train-thumbnail.png" class="vb-image" alt="Vande Bharat">
+        </div>
+
+        <div id="uploadSection" class="row justify-content-center mt-4">
+            <div class="col-md-6 col-lg-5">
+                <div class="upload-zone" id="dropZone" onclick="document.getElementById('excelFile').click()">
+                    <i class="fa-solid fa-file-excel upload-icon"></i>
+                    <h4 class="fw-bold text-dark mb-2" style="font-family: 'Times New Roman', Times, serif;">Upload Variation Statement</h4>
+                    <p class="text-muted small">Drag & drop your IRWCMS .xls / .xlsx file here to run the audit engine.</p>
+                    <input type="file" id="excelFile" accept=".xls,.xlsx" class="d-none" />
+                </div>
+                <div id="fileLoadError" class="global-alert alert-critical hidden mt-3"></div>
+            </div>
+        </div>
+
+        <div id="dashboardSection" class="hidden">
+            
+            <div id="alertLimit" class="global-alert alert-critical hidden"></div>
+            <div id="alertSAVetting" class="global-alert alert-warning-sa hidden"></div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-xl-3 col-sm-6">
+                    <div class="card kpi-card bg-ca">
+                        <div class="card-title">Original Agreement Value</div>
+                        <div class="card-value" id="kpiOrig">₹0.00</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6">
+                    <div class="card kpi-card bg-new">
+                        <div class="card-title">Last Variation Value</div>
+                        <div class="card-value" id="kpiLastVar">₹0.00</div>
+                        <div class="small fw-bold mt-1" style="font-family:'Segoe UI', sans-serif;">(After Rate Reductions)</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6">
+                    <div class="card kpi-card bg-prop">
+                        <div class="card-title">Final Proposed Value</div>
+                        <div class="card-value" id="kpiProp">₹0.00</div>
+                        <div class="small fw-bold mt-1" id="kpiNewSub" style="font-family:'Segoe UI', sans-serif;">Includes New Items: ₹0</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6">
+                    <div class="card kpi-card bg-var" id="kpiVarCard">
+                        <div class="card-title">Overall Variation</div>
+                        <div class="card-value" id="kpiVar">0.00%</div>
+                        <div class="small fw-bold mt-1" style="font-family:'Segoe UI', sans-serif;">(From Original CA)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-lg-7">
+                    <div class="card">
+                        <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-chart-column me-2"></i>Schedule-wise Financial Impact</h6>
+                        <div class="chart-container"><canvas id="scheduleChart"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="card">
+                        <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-chart-pie me-2"></i>Rate Deduction Impact (Savings)</h6>
+                        <div class="chart-container"><canvas id="savingsChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="nav nav-tabs border-0" id="reportTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-master"><i class="fa-solid fa-table me-1"></i> Itemized Master Details</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link text-danger" data-bs-toggle="tab" data-bs-target="#tab-msop"><i class="fa-solid fa-gavel me-1"></i> MSOP Concurrence Matrix</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link text-info" data-bs-toggle="tab" data-bs-target="#tab-sor"><i class="fa-solid fa-layer-group me-1"></i> Schedule Summaries</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link ai-tab" data-bs-toggle="tab" data-bs-target="#tab-ai"><i class="fa-solid fa-robot me-1"></i> AI Scope Analysis</button>
+                </li>
+                <li class="nav-item ms-auto">
+                    <button class="btn btn-dark fw-bold btn-sm mt-1 me-2" onclick="location.reload()" style="font-family:'Times New Roman', serif;"><i class="fa-solid fa-rotate-left me-1"></i> New Audit</button>
+                    <button class="btn btn-success fw-bold btn-sm mt-1" id="exportBtn" style="font-family:'Times New Roman', serif;"><i class="fa-solid fa-file-excel me-1"></i> Export Data</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="reportTabsContent">
+                
+                <div class="tab-pane fade show active table-responsive" id="tab-master">
+                    <table id="tableMaster" class="table table-hover table-bordered align-middle w-100">
+                        <thead>
+                            <tr>
+                                <th>Item No.</th>
+                                <th>Category</th>
+                                <th>Schedule</th>
+                                <th>Orig. Amt (₹)</th>
+                                <th>Last Var. Amt (₹)</th>
+                                <th>Prop. Amt (Cut) (₹)</th>
+                                <th>Var %</th>
+                                <th>MSOP Para</th>
+                                <th>Reduction Slab</th>
+                                <th>Finance Concurrence</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="tab-pane fade table-responsive" id="tab-msop">
+                    <div class="alert alert-secondary border-secondary border-start border-4 mb-4 fw-bold">
+                        <i class="fa-solid fa-circle-info me-2"></i> Displays items strictly mapped to governing MSOP 2018 Paragraphs requiring mandatory Finance Concurrence.
+                    </div>
+                    <table id="tableMSOP" class="table table-hover table-bordered align-middle w-100 text-center">
+                        <thead style="background-color: #f8d7da;">
+                            <tr>
+                                <th style="background-color: #f8d7da; color: #721c24;">Para 7 (New SOR Items)</th>
+                                <th style="background-color: #f8d7da; color: #721c24;">Para 8B (New NS Items)</th>
+                                <th style="background-color: #f8d7da; color: #721c24;">Para 9A (+ve Variations)</th>
+                                <th style="background-color: #f8d7da; color: #721c24;">Para 9B (-ve Variations)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="tab-pane fade table-responsive" id="tab-sor">
+                    <table id="tableSOR" class="table table-hover table-bordered align-middle w-100">
+                        <thead style="background-color: #d1ecf1;">
+                            <tr>
+                                <th style="background-color: #d1ecf1; color: #0c5460;">Schedule</th>
+                                <th style="background-color: #d1ecf1; color: #0c5460;">Net Original Amt (₹)</th>
+                                <th style="background-color: #d1ecf1; color: #0c5460;">Net Last Var Amt (₹)</th>
+                                <th style="background-color: #d1ecf1; color: #0c5460;">Net Proposed Amt (No Cut) (₹)</th>
+                                <th style="background-color: #d1ecf1; color: #0c5460;">Amt After Rate Reduction (₹)</th>
+                                <th style="background-color: #d1ecf1; color: #0c5460;">Var % from Orig</th>
+                                <th style="background-color: #d1ecf1; color: #0c5460;">Var % from Last</th>
+                                <th style="background-color: #d1ecf1; color: #0c5460;">Var % (After Red) from Orig</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="tab-pane fade ai-container" id="tab-ai">
+                    <h5 class="fw-bold mb-3" style="color: #05c46b;"><i class="fa-solid fa-wand-magic-sparkles me-2"></i>AI Quantity & Scope Analysis</h5>
+                    <p class="text-muted small mb-4">Upload work details to automatically parse item quantities, detect anomalies, verify scope linkages, and compare similar works.</p>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Name of Work</label>
+                            <input type="text" id="workName" class="form-control" placeholder="Enter work description or contract name">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Google Gemini API Key</label>
+                            <input type="password" id="geminiApiKey" class="form-control" placeholder="Enter API Key">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Work Details (PDF Upload)</label>
+                            <input type="file" id="workPdf" class="form-control" accept=".pdf">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Similar Work Comparison (Excel Upload)</label>
+                            <input type="file" id="similarExcel" class="form-control" accept=".xls,.xlsx">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success fw-bold w-100 py-2" onclick="runAIAnalysis()">Run Scope & Quantity Analysis</button>
+                    
+                    <div id="aiLoading" class="hidden text-center my-5">
+                        <div class="spinner-border text-success" role="status"></div>
+                        <p class="mt-2 text-muted fw-bold">Synthesizing parameters and analyzing scope alignments...</p>
+                    </div>
+                    
+                    <div id="aiResult" class="p-4 bg-light border rounded mt-4" style="min-height: 200px; white-space: pre-wrap; font-family: 'Segoe UI', sans-serif; font-size: 0.95rem;">
+                        <em>Your AI-generated scope analysis will appear here.</em>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="inputModal" class="modal-overlay">
+        <div class="modal-box">
+            <h4 class="text-danger fw-bold mb-3"><i class="fa-solid fa-circle-exclamation me-2"></i>Action Required: Previously Added New Items</h4>
+            <p class="text-muted fw-bold">The system detected items added in a previous variation whose quantities have changed again. To accurately apply rate reduction slabs, please enter their <strong>Original Base Schedule Quantity</strong> from the initial addition.</p>
+            <table class="table table-sm table-bordered align-middle mb-4" style="font-family: 'Times New Roman', serif;">
+                <thead class="table-light">
+                    <tr><th>Item No</th><th>Description</th><th>Last Qty</th><th>Prop Qty</th><th>Enter Base Qty</th></tr>
+                </thead>
+                <tbody id="modalTableBody"></tbody>
+            </table>
+            <button class="btn btn-primary w-100 fw-bold py-2" onclick="submitModalData()" style="font-family: 'Times New Roman', serif;">Apply Quantities & Run Audit Engine</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        const formatter = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2 });
+        let rawData = [], processedData = [], summaryData = [], pendingModalItems = [];
+        let scheduleStats = {}, nsGroupStats = {};
+        let chartInstances = {};
+        
+        let totalAgreementValue = 0, totalProposedValue = 0, totalLastVarValue = 0;
+        let totalNewItemsValue = 0, totalNewNSItemsValue = 0, totalNewSORItemsValue = 0;
+        let globalTotalSavings = 0;
+        
+        let msopPara7 = [], msopPara8b = [], msopPara9a = [], msopPara9b = [];
+
+        function getVal(row, possibleKeys) {
+            const rowKeys = Object.keys(row);
+            for (let rk of rowKeys) {
+                const cleanRk = rk.replace(/[\s\n\r]+/g, '').toLowerCase();
+                for (let pk of possibleKeys) {
+                    if (cleanRk === pk.replace(/[\s\n\r]+/g, '').toLowerCase()) return row[rk];
+                }
+            }
+            return undefined;
+        }
+
+        function parseNumber(val) {
+            if (val === undefined || val === null || val === '') return 0;
+            if (typeof val === 'number') return val;
+            let str = String(val).replace(/,/g, '').trim();
+            let isNegative = str.indexOf('-') !== -1 || (str.startsWith('(') && str.endsWith(')'));
+            let numStr = str.replace(/[^\d.]/g, ''); 
+            let num = parseFloat(numStr);
+            if (isNaN(num)) return 0;
+            return isNegative ? -num : num;
+        }
+
+        function parseUnitDivisor(val) {
+            if (val === undefined || val === null || val === '') return 1;
+            let str = String(val).toLowerCase().trim();
+            str = str.replace(/^per\s+/i, ''); 
+            let match = str.match(/^([\d.]+)/); 
+            if (match) return parseFloat(match[1]) > 0 ? parseFloat(match[1]) : 1;
+            return 1; 
+        }
+
+        const dropZone = document.getElementById('dropZone');
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.background = '#e9ecef'; });
+        dropZone.addEventListener('dragleave', () => dropZone.style.background = 'rgba(255,255,255,0.95)');
+        dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.style.background = 'rgba(255,255,255,0.95)'; if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
+        document.getElementById('excelFile').addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+        function handleFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    rawData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                    preProcessData();
+                } catch (err) {
+                    document.getElementById('fileLoadError').innerText = "Critical Error: Corrupted file or missing standard headers.";
+                    document.getElementById('fileLoadError').classList.remove('hidden');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function preProcessData() {
+            pendingModalItems = [];
+            let filteredData = [];
+            let currentSdlType = "NS";
+            let currentSchedule = "Uncategorized";
+
+            rawData.forEach((row, index) => {
+                let itemNoRaw = getVal(row, ['Item No.', 'Item_No', 'Item No', 'Item']);
+                let itemNoStr = String(itemNoRaw || '').trim();
+                let itemNoLower = itemNoStr.toLowerCase();
+                
+                if (!itemNoStr || itemNoStr === '' || itemNoStr === 'undefined' || itemNoLower.includes('total') || itemNoLower.includes('gross') || itemNoLower.includes('summary')) {
+                    return; 
+                }
+
+                let sType = getVal(row, ['Sdl Type', 'SdlType', 'Schedule Type']);
+                if (sType && String(sType).trim() !== '') currentSdlType = String(sType).trim().toUpperCase();
+                row._type = currentSdlType;
+
+                let sName = getVal(row, ['Schedule', 'Schedule Name', 'Schedule ']);
+                if (sName && String(sName).trim() !== '') currentSchedule = String(sName).trim();
+                row._sch = currentSchedule;
+                row._itemNoStr = itemNoStr;
+
+                const rawRate = parseNumber(getVal(row, ['Agreement Rate', 'Rate', 'Base Rate', 'Agmt Rate', 'Accepted Rate']));
+                const originalQtyRaw = parseNumber(getVal(row, ['Qty. as per Orig. Agmt.', 'Orig Qty', 'Qty. as per Orig. Agmt', 'Original Qty']));
+                const sheetOrigAmt = parseNumber(getVal(row, ['Amount as per original agreement', 'Amount as per Orig. Agmt.', 'Original Amount']));
+                const sheetPropAmt = parseNumber(getVal(row, ['Amount as per proposed variation', 'Proposed Amount']));
+                const sheetLastAmt = parseNumber(getVal(row, ['Amount as per last variation', 'Amount as per Last Var.', 'Last Variation Amount', 'Last Var Amt']));
+                const executedQty = parseNumber(getVal(row, ['Proposed QTY.', 'Proposed Qty', 'Final Qty', 'Prop Qty']));
+
+                if (rawRate === 0 && sheetOrigAmt === 0 && originalQtyRaw === 0 && sheetPropAmt === 0 && executedQty === 0) return; 
+
+                const unitStr = String(getVal(row, ['Unit', 'UOM', 'Units']) || '').trim();
+                const unitDivisor = parseUnitDivisor(unitStr);
+                let rate = rawRate / unitDivisor; 
+
+                const lastQtyStr = getVal(row, ['Last Variation Qty.', 'Last Var Qty']);
+                let lastVariationQty = null;
+                if (lastQtyStr !== undefined && String(lastQtyStr).trim() !== '') {
+                    lastVariationQty = parseNumber(lastQtyStr);
+                }
+
+                row._originalQtyRaw = originalQtyRaw;
+                row._executedQty = executedQty;
+                row._lastVariationQty = lastVariationQty;
+                row._unitDivisor = unitDivisor;
+                row._rawRate = rawRate;
+                row._rate = rate;
+                row._sheetOrigAmt = sheetOrigAmt;
+                row._sheetPropAmt = sheetPropAmt;
+                row._sheetLastAmt = sheetLastAmt;
+
+                if (originalQtyRaw === 0 && executedQty !== 0 && lastVariationQty !== null && lastVariationQty !== 0 && executedQty !== lastVariationQty) {
+                    pendingModalItems.push({ index: filteredData.length, row: row, lastQty: lastVariationQty, propQty: executedQty });
+                }
+                
+                filteredData.push(row);
+            });
+            
+            rawData = filteredData;
+            if (pendingModalItems.length > 0) openModal();
+            else finalizeProcessing();
+        }
+
+        function openModal() {
+            document.getElementById('modalTableBody').innerHTML = pendingModalItems.map(item => `
+                <tr>
+                    <td class="fw-bold">${item.row._itemNoStr}</td>
+                    <td>${(getVal(item.row, ['Item Desc.', 'Description', 'Desc']) || '').substring(0,30)}...</td>
+                    <td>${item.lastQty}</td>
+                    <td>${item.propQty}</td>
+                    <td><input type="number" id="modalInput_${item.index}" class="form-control form-control-sm" value="${item.lastQty}" min="0.01" step="any" style="font-family:'Times New Roman', serif;"></td>
+                </tr>`).join('');
+            document.getElementById('inputModal').style.display = 'flex';
+        }
+
+        function submitModalData() {
+            let allValid = true;
+            pendingModalItems.forEach(item => {
+                let val = parseFloat(document.getElementById(`modalInput_${item.index}`).value);
+                if (!val || val <= 0) allValid = false;
+                else {
+                    rawData[item.index]['_Base_Qty_For_Variation'] = val;
+                    rawData[item.index]['_User_Overridden_Orig_Qty'] = true;
+                }
+            });
+            if (!allValid) return alert("Please enter valid positive quantities greater than 0.");
+            document.getElementById('inputModal').style.display = 'none';
+            finalizeProcessing();
+        }
+
+        function getNSItemPayable(qty, baseQty, rate, isMajor) {
+            let pureAmt = qty * rate;
+            if (baseQty <= 0 || pureAmt < 0 || rate < 0 || qty < 0) return pureAmt; 
+            
+            let limit1 = baseQty * (isMajor ? 1.25 : 2.00);
+            let limit2 = baseQty * (isMajor ? 1.40 : 3.00);
+            
+            let q100 = 0, q98 = 0, q96 = 0;
+            if (qty <= limit1) { q100 = qty; } 
+            else if (qty <= limit2) { q100 = limit1; q98 = qty - limit1; } 
+            else { q100 = limit1; q98 = limit2 - limit1; q96 = qty - limit2; }
+            
+            return (q100 * rate) + (q98 * rate * 0.98) + (q96 * rate * 0.96);
+        }
+
+        function getSORSchedPayable(totalAmt, origAmt) {
+            if (origAmt <= 0 || totalAmt <= 0) return totalAmt; 
+            
+            let limit1 = origAmt * 1.25;
+            let limit2 = origAmt * 1.40;
+            
+            if (totalAmt <= limit1) return totalAmt;
+            if (totalAmt <= limit2) return limit1 + (totalAmt - limit1) * 0.98;
+            return limit1 + (limit2 - limit1) * 0.98 + (totalAmt - limit2) * 0.96;
+        }
+
+        function finalizeProcessing() {
+            totalAgreementValue = 0; totalProposedValue = 0; totalLastVarValue = 0;
+            totalNewItemsValue = 0; totalNewNSItemsValue = 0; totalNewSORItemsValue = 0;
+            globalTotalSavings = 0;
+            scheduleStats = {}; nsGroupStats = {};
+            
+            let saVettingPara9A = false; let saVettingPara9B = false;
+
+            rawData.forEach(row => {
+                let originalQtyRaw = row._originalQtyRaw;
+                let baseQty = row._User_Overridden_Orig_Qty ? (parseFloat(row._Base_Qty_For_Variation) || 0) : originalQtyRaw;
+                let rate = row._rate; 
+                let sheetOrigAmt = row._sheetOrigAmt;
+                let sheetPropAmt = row._sheetPropAmt;
+                let sheetLastAmt = row._sheetLastAmt;
+                let executedQty = row._executedQty;
+
+                let trueRate = Math.abs(rate);
+                if (trueRate === 0) {
+                    if (originalQtyRaw !== 0 && sheetOrigAmt !== 0) trueRate = Math.abs(sheetOrigAmt / originalQtyRaw);
+                    else if (executedQty !== 0 && sheetPropAmt !== 0) trueRate = Math.abs(sheetPropAmt / executedQty);
+                }
+                row._trueRate = trueRate;
+
+                let isDeduction = (sheetOrigAmt < 0 || sheetPropAmt < 0 || originalQtyRaw < 0 || executedQty < 0 || rate < 0 || (row._lastVariationQty !== null && row._lastVariationQty < 0));
+                let sign = isDeduction ? -1 : 1;
+                row._sign = sign;
+                
+                let origAmt = 0;
+                if (originalQtyRaw !== 0) origAmt = Math.abs(originalQtyRaw) * trueRate * sign;
+                else if (sheetOrigAmt !== 0) origAmt = sheetOrigAmt; 
+
+                let propAmtRaw = 0;
+                if (executedQty !== 0) propAmtRaw = Math.abs(executedQty) * trueRate * sign;
+                else if (sheetPropAmt !== 0) propAmtRaw = sheetPropAmt;
+                
+                let lastVariationQty = row._lastVariationQty;
+                let isFirstTimeNewItem = (!row._User_Overridden_Orig_Qty && originalQtyRaw === 0 && (lastVariationQty === null || lastVariationQty === 0));
+                
+                let effLastQty = isFirstTimeNewItem ? 0 : ((lastVariationQty !== null) ? lastVariationQty : originalQtyRaw);
+                
+                let lastAmtRaw = 0;
+                if (effLastQty !== 0) lastAmtRaw = Math.abs(effLastQty) * trueRate * sign;
+                else if (!isFirstTimeNewItem && row._sheetLastAmt !== 0 && row._sheetLastAmt !== undefined) lastAmtRaw = row._sheetLastAmt;
+                
+                totalAgreementValue += origAmt;
+
+                let type = row._type;
+                let sch = row._sch;
+
+                if (isFirstTimeNewItem || row._User_Overridden_Orig_Qty) {
+                    if (originalQtyRaw === 0) {
+                        totalNewItemsValue += propAmtRaw;
+                        if (type === 'NS') totalNewNSItemsValue += propAmtRaw;
+                        else totalNewSORItemsValue += propAmtRaw;
+                    }
+                }
+                
+                let itemType = getVal(row, ['Item Type', 'ItemType']) || '';
+                let itemNo = row._itemNoStr;
+                
+                let isGroup = false; 
+                let groupId = null;
+                if (type === 'NS' && String(itemType).trim().toLowerCase() === 'group') {
+                    let cleanItemNo = itemNo.replace(/\s+/g, '').toLowerCase();
+                    let numMatch = cleanItemNo.match(/^(\d+)/); 
+                    if (numMatch) {
+                        if (numMatch[1].length >= 6) {
+                            isGroup = false; 
+                        } else if (numMatch[1].length >= 3) {
+                            isGroup = true;
+                            groupId = 'Group_' + numMatch[1].substring(0, numMatch[1].length - 2);
+                        } else {
+                            isGroup = false; 
+                        }
+                    }
+                }
+                
+                row._isGroup = isGroup; 
+                row._groupId = groupId;
+                row._origAmtPure = origAmt;
+                row._propAmtRaw = propAmtRaw;
+                row._lastAmtRaw = lastAmtRaw;
+                row._isFirstTimeNewItem = isFirstTimeNewItem;
+                row._effLastQty = effLastQty;
+                row._baseQty = baseQty;
+                
+                if (isGroup) {
+                    if (!nsGroupStats[groupId]) nsGroupStats[groupId] = { totalBaseAmt: 0 };
+                    nsGroupStats[groupId].totalBaseAmt += Math.abs(baseQty * trueRate); 
+                }
+
+                if (!scheduleStats[sch]) {
+                    scheduleStats[sch] = { 
+                        type: type, 
+                        origAmt: 0, 
+                        propAmtRaw: 0, 
+                        propAmtPos: 0,
+                        lastAmtRaw: 0,
+                        lastAmtPos: 0,
+                        propAmtRed: 0, 
+                        lastAmtRed: 0, 
+                        multPropPos: 1, 
+                        multLastPos: 1 
+                    };
+                }
+                
+                scheduleStats[sch].origAmt += origAmt; 
+                scheduleStats[sch].propAmtRaw += propAmtRaw;
+                scheduleStats[sch].lastAmtRaw += lastAmtRaw;
+
+                if (propAmtRaw > 0) scheduleStats[sch].propAmtPos += propAmtRaw;
+                if (lastAmtRaw > 0) scheduleStats[sch].lastAmtPos += lastAmtRaw;
+            });
+
+            const onePercentOAV = 0.01 * Math.abs(totalAgreementValue);
+
+            for (let sch in scheduleStats) {
+                let s = scheduleStats[sch];
+                if (s.type === 'SOR') {
+                    s.propAmtRed = getSORSchedPayable(s.propAmtRaw, s.origAmt);
+                    let propPenalty = s.propAmtRaw - s.propAmtRed;
+                    s.multPropPos = s.propAmtPos > 0 ? ((s.propAmtPos - propPenalty) / s.propAmtPos) : 1;
+                    
+                    s.lastAmtRed = getSORSchedPayable(s.lastAmtRaw, s.origAmt);
+                    let lastPenalty = s.lastAmtRaw - s.lastAmtRed;
+                    s.multLastPos = s.lastAmtPos > 0 ? ((s.lastAmtPos - lastPenalty) / s.lastAmtPos) : 1;
+                }
+            }
+
+            msopPara7 = []; msopPara8b = []; msopPara9a = []; msopPara9b = [];
+            let addedSORSchedules = new Set();
+            let totalSavingsGenerated = 0;
+
+            processedData = rawData.map(row => {
+                let type = row._type;
+                let sch = row._sch;
+                let baseQty = row._baseQty;
+                let trueRate = row._trueRate;
+                let executedQty = row._executedQty;
+                let effLastQty = row._effLastQty;
+                
+                let origAmt = row._origAmtPure;
+                let propAmtRaw = row._propAmtRaw;
+                let lastAmtRaw = row._lastAmtRaw;
+                let sign = row._sign;
+
+                let itemBaseVal = Math.abs(baseQty * trueRate);
+                let isMinor = true;
+                if (row._isGroup) isMinor = Math.abs(nsGroupStats[row._groupId].totalBaseAmt) < onePercentOAV;
+                else isMinor = itemBaseVal < onePercentOAV;
+                let isMajor = !isMinor && (row._isGroup ? Math.abs(nsGroupStats[row._groupId].totalBaseAmt) > 0 : itemBaseVal > 0);
+
+                let itemCategory = ""; let reductionSlab = "No Reduction"; let financeConcurrence = "No";
+                let itemPropPayable = 0; let itemLastPayable = 0; let varStr = "0.00%"; let varNum = 0;
+                let executionPercentage = 0; let effectiveRate = trueRate; let msopPara = "N/A";
+
+                if (row._isFirstTimeNewItem) {
+                    itemCategory = "New Item";
+                    varStr = "N/A (New Item)";
+                    msopPara = (type === 'NS') ? "Para 8B" : "Para 7";
+                    
+                    if (type === 'NS') {
+                        itemPropPayable = propAmtRaw;
+                        itemLastPayable = 0; 
+                        if (totalNewNSItemsValue > 500000) financeConcurrence = "Yes (New NS > 5L)";
+                        else financeConcurrence = "No (Within limits)";
+                    } else { 
+                        itemPropPayable = propAmtRaw > 0 ? (propAmtRaw * scheduleStats[sch].multPropPos) : propAmtRaw;
+                        itemLastPayable = 0;
+                        effectiveRate = trueRate * scheduleStats[sch].multPropPos;
+                        reductionSlab = scheduleStats[sch].multPropPos < 1.0 && propAmtRaw > 0 ? "Sch. Blended Cut" : "No Cut";
+                        
+                        let para7Limit = totalAgreementValue !== 0 ? Math.min(500000, 0.10 * Math.abs(totalAgreementValue)) : 500000;
+                        if (totalNewSORItemsValue > para7Limit) financeConcurrence = "Yes (Cumulative New SOR > 10% or 5L)";
+                        else financeConcurrence = "No (Cumulative New SOR within limit)";
+                    }
+                } 
+                else if (baseQty !== 0 || row._User_Overridden_Orig_Qty) {
+                    varNum = (baseQty !== 0) ? ((Math.abs(executedQty) - Math.abs(baseQty)) / Math.abs(baseQty)) * 100 : 0;
+                    executionPercentage = (baseQty !== 0) ? (Math.abs(executedQty) / Math.abs(baseQty)) * 100 : 0;
+                    varStr = (varNum > 0 ? "+" : "") + varNum.toFixed(2) + "%";
+                    if (row._User_Overridden_Orig_Qty) varStr += ` (Sch Qty: ${Math.abs(baseQty)})`;
+
+                    if (row._User_Overridden_Orig_Qty) {
+                        itemCategory = "Prev. New Item (" + (isMajor ? "Major" : "Minor") + ")" + (row._isGroup ? " (Grp)" : "");
+                    } else {
+                        itemCategory = (isMajor ? "Major Item" : "Minor Item") + (row._isGroup ? " (Group)" : "");
+                    }
+                    
+                    msopPara = varNum > 0 ? "Para 9A" : (varNum < 0 ? "Para 9B" : "N/A");
+
+                    if (type === 'NS') {
+                        if (isMajor) {
+                            if (varNum > 25) saVettingPara9A = true; else if (varNum < -25) saVettingPara9B = true;
+                        } else {
+                            if (varNum > 100) saVettingPara9A = true; else if (varNum < -100) saVettingPara9B = true;
+                        }
+                    }
+
+                    if (type === 'SOR') {
+                        itemPropPayable = propAmtRaw > 0 ? (propAmtRaw * scheduleStats[sch].multPropPos) : propAmtRaw;
+                        itemLastPayable = lastAmtRaw > 0 ? (lastAmtRaw * scheduleStats[sch].multLastPos) : lastAmtRaw;
+                        effectiveRate = trueRate * scheduleStats[sch].multPropPos;
+                        reductionSlab = scheduleStats[sch].multPropPos < 1.0 && propAmtRaw > 0 ? "Sch. Blended Cut" : (propAmtRaw < 0 ? "No Reduction (Deduction)" : "No Cut");
+                        
+                        let schVar = scheduleStats[sch].origAmt !== 0 ? ((scheduleStats[sch].propAmtRaw - scheduleStats[sch].origAmt) / Math.abs(scheduleStats[sch].origAmt)) * 100 : 0;
+                        if (schVar > 50) financeConcurrence = "Yes (Sch Var > 50%)";
+                        else financeConcurrence = "No (Overall Sch Var <= 50%)";
+                    } else { 
+                        if (sign === -1) {
+                            itemPropPayable = propAmtRaw;
+                            itemLastPayable = lastAmtRaw;
+                            reductionSlab = "No Reduction (Deduction Item)";
+                        } else {
+                            itemPropPayable = getNSItemPayable(Math.abs(executedQty), Math.abs(baseQty), trueRate, isMajor);
+                            itemLastPayable = getNSItemPayable(Math.abs(effLastQty), Math.abs(baseQty), trueRate, isMajor);
+                            
+                            if (itemPropPayable < propAmtRaw) reductionSlab = "Slabbed Penalty";
+                            else reductionSlab = "No Reduction";
+                        }
+
+                        if (isMajor) financeConcurrence = (varNum > 50) ? "Yes (NS Major Var > 50%)" : "No (NS Major Var <= 50%)";
+                        else financeConcurrence = (executionPercentage > 300) ? "Yes (Minor Qty > 300%)" : "No (Minor Qty <= 300%)";
+                    }
+
+                    if (varNum < 0) {
+                        if (isMajor) financeConcurrence = (varNum < -25) ? "Yes (Negative Var > 25% drop - Obtain No Claim Certificate)" : "No (Negative Var <= 25% drop)";
+                        else financeConcurrence = `No (Finance concurrence is not required for negative variation in minor ${type} items)`;
+                    }
+                } else {
+                    itemPropPayable = propAmtRaw;
+                    itemLastPayable = lastAmtRaw;
+                    reductionSlab = "N/A";
+                }
+
+                let withinOrEquivalent = false;
+                
+                if (row._lastVariationQty !== null) {
+                    if (Math.abs(executedQty - effLastQty) < 0.0001) {
+                        withinOrEquivalent = true;
+                        if (reductionSlab !== "No Reduction" && !reductionSlab.includes("Sch.")) {
+                            reductionSlab = "N/A (No Change)";
+                        }
+                    } else if (financeConcurrence.includes("Yes")) {
+                        if (type === 'SOR' && financeConcurrence.includes('Sch Var')) {
+                            let currentSchVar = scheduleStats[sch].propAmtRaw - scheduleStats[sch].origAmt;
+                            let lastSchVar = scheduleStats[sch].lastAmtRaw - scheduleStats[sch].origAmt;
+                            
+                            if ((currentSchVar > 0 && lastSchVar > 0 && currentSchVar <= lastSchVar + 0.01) || 
+                                (currentSchVar < 0 && lastSchVar < 0 && currentSchVar >= lastSchVar - 0.01)) {
+                                withinOrEquivalent = true;
+                            }
+                        } else {
+                            const currentVar = executedQty - baseQty;
+                            const lastVar = effLastQty - baseQty;
+                            
+                            if ((currentVar > 0 && lastVar > 0 && currentVar <= lastVar + 0.0001) || 
+                                (currentVar < 0 && lastVar < 0 && currentVar >= lastVar - 0.0001)) {
+                                withinOrEquivalent = true;
+                            }
+                        }
+                    }
+                }
+
+                if (withinOrEquivalent) {
+                    financeConcurrence = "No (Finance concurrence is not required as variation is within or equivalent to previous variation)";
+                }
+
+                if (type === 'NS') {
+                    scheduleStats[sch].propAmtRed += itemPropPayable;
+                    scheduleStats[sch].lastAmtRed += itemLastPayable;
+                }
+                
+                if (propAmtRaw > 0 && itemPropPayable > 0 && type === 'NS') {
+                    totalSavingsGenerated += (propAmtRaw - itemPropPayable);
+                }
+
+                if (financeConcurrence.includes("Yes")) {
+                    let lbl = `${row._itemNoStr} (Sch: ${sch})`;
+                    if (type === 'SOR' && financeConcurrence.includes('Sch Var > 50%')) {
+                        if (!addedSORSchedules.has(sch)) {
+                            addedSORSchedules.add(sch);
+                            msopPara9a.push(`Entire Schedule: ${sch}`);
+                        }
+                    } else {
+                        if (msopPara === "Para 7") msopPara7.push(lbl);
+                        else if (msopPara === "Para 8B") msopPara8b.push(lbl);
+                        else if (msopPara === "Para 9A") msopPara9a.push(lbl);
+                        else if (msopPara === "Para 9B") msopPara9b.push(lbl);
+                    }
+                }
+
+                let displayEffRate = (executedQty !== 0) ? ((itemPropPayable / executedQty) * row._unitDivisor) : (trueRate * row._unitDivisor * sign);
+                if (propAmtRaw < 0) displayEffRate = trueRate * row._unitDivisor * sign; 
+
+                row._processed = {
+                    itemNo: row._itemNoStr, type: type, sch: sch, cat: itemCategory,
+                    varStr: varStr, msop: msopPara, redSlab: reductionSlab,
+                    effRate: displayEffRate, origAmt: origAmt, lastAmt: itemLastPayable, payAmt: itemPropPayable, fc: financeConcurrence,
+                    origQty: baseQty, propQty: executedQty
+                };
+                return row;
+            });
+
+            for(let s in scheduleStats) {
+                if (scheduleStats[s].type === 'SOR') {
+                    if(scheduleStats[s].propAmtRaw > 0) {
+                        totalSavingsGenerated += (scheduleStats[s].propAmtRaw - scheduleStats[s].propAmtRed);
+                    }
+                }
+            }
+
+            globalTotalSavings = totalSavingsGenerated;
+            let totalProposedBaseForLimits = 0;
+            for(let s in scheduleStats) totalProposedBaseForLimits += scheduleStats[s].propAmtRaw;
+            
+            let overallContractVariationPct = totalAgreementValue !== 0 ? ((totalProposedBaseForLimits - totalAgreementValue) / Math.abs(totalAgreementValue)) * 100 : 0;
+            if (overallContractVariationPct > 10 || totalNewItemsValue > 500000) saVettingPara9A = true;
+            if (overallContractVariationPct < -10) saVettingPara9B = true;
+
+            renderUI(overallContractVariationPct, totalSavingsGenerated, saVettingPara9A, saVettingPara9B, totalProposedBaseForLimits);
+        }
+
+        function renderUI(overallVarPct, totalSavings, saVettingPara9A, saVettingPara9B, totalProposedBaseForLimits) {
+            document.getElementById('uploadSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+
+            document.getElementById('kpiOrig').innerText = formatter.format(totalAgreementValue);
+            document.getElementById('kpiNewSub').innerText = `Includes New Items: ${formatter.format(totalNewItemsValue)}`;
+            document.getElementById('kpiVar').innerText = overallVarPct.toFixed(2) + "%";
+            
+            if (overallVarPct > 50) document.getElementById('kpiVarCard').classList.replace('bg-var', 'bg-new');
+
+            const limitAlertBox = document.getElementById('alertLimit');
+            if (totalAgreementValue > 0 && totalProposedBaseForLimits > (totalAgreementValue * 1.5)) {
+                limitAlertBox.innerHTML = `⚠️ <strong>MSOP ALERT:</strong> Overall Contract Value has exceeded 150% (Calculated before rate reduction). This requires General Manager (GM) approval and personal concurrence of PFA.`;
+                limitAlertBox.classList.remove('hidden');
+            } else { limitAlertBox.classList.add('hidden'); }
+
+            const saAlertBox = document.getElementById('alertSAVetting');
+            if (saVettingPara9A || saVettingPara9B) {
+                let paras = [];
+                if (saVettingPara9A) paras.push("Para 9 A");
+                if (saVettingPara9B) paras.push("Para 9 B");
+                saAlertBox.innerHTML = `📋 <strong>SA VETTING REQUIRED:</strong> Supplementary Agreement (SA) Vetting is required globally in terms of MSOP 2018 Part A ${paras.join(" and ")}.`;
+                saAlertBox.classList.remove('hidden');
+            } else { saAlertBox.classList.add('hidden'); }
+
+            if($.fn.DataTable.isDataTable('#tableMaster')) {
+                $('#tableMaster, #tableMSOP, #tableSOR').DataTable().destroy();
+            }
+
+            document.querySelector('#tableMaster tbody').innerHTML = processedData.map(d => {
+                let p = d._processed;
+                return `<tr class="${p.fc.includes('Yes') ? 'table-danger' : (p.cat.includes('New') ? 'table-warning' : '')}">
+                    <td class="fw-bold">${p.itemNo}</td>
+                    <td><span class="badge ${p.cat.includes('Minor') ? 'bg-secondary' : (p.cat.includes('Major') ? 'bg-primary' : 'bg-dark')}">${p.cat}</span></td>
+                    <td>${p.sch}</td>
+                    <td>${p.origAmt.toFixed(2)}</td>
+                    <td>${p.lastAmt.toFixed(2)}</td>
+                    <td class="fw-bold">${p.payAmt.toFixed(2)}</td>
+                    <td class="fw-bold">${p.varStr}</td>
+                    <td>${p.msop}</td>
+                    <td>${p.redSlab}</td>
+                    <td class="fw-bold ${p.fc.includes('Yes') ? 'text-danger' : 'text-success'}">${p.fc}</td>
+                </tr>`;
+            }).join('');
+
+            let maxRows = Math.max(msopPara7.length, msopPara8b.length, msopPara9a.length, msopPara9b.length);
+            let msopHtml = "";
+            for(let i=0; i<maxRows; i++) {
+                msopHtml += `<tr>
+                    <td>${msopPara7[i] || '-'}</td>
+                    <td>${msopPara8b[i] || '-'}</td>
+                    <td>${msopPara9a[i] || '-'}</td>
+                    <td>${msopPara9b[i] || '-'}</td>
+                </tr>`;
+            }
+            document.querySelector('#tableMSOP tbody').innerHTML = msopHtml;
+
+            summaryData = [];
+            let grandOrig = 0, grandLast = 0, grandProp = 0, grandPayable = 0;
+            
+            let safeSchSum = {};
+            processedData.forEach(d => {
+                if(!safeSchSum[d._sch]) safeSchSum[d._sch] = { orig: 0, last: 0, propNoRed: 0, pay: 0 };
+                safeSchSum[d._sch].orig += d._processed.origAmt;
+                safeSchSum[d._sch].last += d._processed.lastAmt;
+                safeSchSum[d._sch].propNoRed += d._propAmtRaw;
+                safeSchSum[d._sch].pay += d._processed.payAmt;
+            });
+
+            for (let sch in safeSchSum) {
+                let s = safeSchSum[sch];
+                if (s.orig !== 0 || s.propNoRed !== 0) {
+                    let vOrig = s.orig !== 0 ? (((s.propNoRed - s.orig) / Math.abs(s.orig)) * 100).toFixed(2) + '%' : "N/A";
+                    let vLast = s.last !== 0 ? (((s.pay - s.last) / Math.abs(s.last)) * 100).toFixed(2) + '%' : "N/A";
+                    let vRed = s.orig !== 0 ? (((s.pay - s.orig) / Math.abs(s.orig)) * 100).toFixed(2) + '%' : "N/A";
+                    
+                    if (scheduleStats[sch].type === 'SOR') {
+                        s.pay = scheduleStats[sch].propAmtRed;
+                        s.last = scheduleStats[sch].lastAmtRed;
+                        vLast = s.last !== 0 ? (((s.pay - s.last) / Math.abs(s.last)) * 100).toFixed(2) + '%' : "N/A";
+                        vRed = s.orig !== 0 ? (((s.pay - s.orig) / Math.abs(s.orig)) * 100).toFixed(2) + '%' : "N/A";
+                    }
+                    
+                    summaryData.push({ sch, orig: s.orig, last: s.last, prop: s.propNoRed, pay: s.pay, vOrig, vLast, vRed });
+                    
+                    grandOrig += s.orig; grandLast += s.last; grandProp += s.propNoRed; grandPayable += s.pay;
+                }
+            }
+            
+            summaryData.push({ sch: "GRAND TOTAL", orig: grandOrig, last: grandLast, prop: grandProp, pay: grandPayable, 
+                               vOrig: grandOrig !== 0 ? (((grandProp - grandOrig)/Math.abs(grandOrig))*100).toFixed(2) + '%' : 'N/A',
+                               vLast: grandLast !== 0 ? (((grandPayable - grandLast)/Math.abs(grandLast))*100).toFixed(2) + '%' : 'N/A',
+                               vRed: grandOrig !== 0 ? (((grandPayable - grandOrig)/Math.abs(grandOrig))*100).toFixed(2) + '%' : 'N/A' });
+
+            totalProposedValue = grandPayable; 
+            document.getElementById('kpiLastVar').innerText = formatter.format(grandLast);
+            document.getElementById('kpiProp').innerText = formatter.format(grandPayable);
+
+            document.querySelector('#tableSOR tbody').innerHTML = summaryData.map(d => {
+                let isGrand = d.sch === "GRAND TOTAL";
+                let bad = parseFloat(d.vOrig) > 25;
+                return `<tr class="${isGrand ? 'table-secondary fw-bold text-dark' : (bad ? 'table-danger fw-bold' : '')}">
+                    <td>${d.sch}</td>
+                    <td>${d.orig.toFixed(2)}</td>
+                    <td>${d.last.toFixed(2)}</td>
+                    <td>${d.prop.toFixed(2)}</td>
+                    <td>${d.pay.toFixed(2)}</td>
+                    <td class="${bad ? 'text-danger' : ''}">${d.vOrig}</td>
+                    <td>${d.vLast}</td>
+                    <td>${d.vRed}</td>
+                </tr>`;
+            }).join('');
+
+            let dtConfig = { paging: false, info: false, responsive: true, ordering: false };
+            let msopDtConfig = { paging: false, info: false, responsive: true, ordering: false, language: { emptyTable: '<div class="text-success fw-bold p-3 text-center">✓ No items require MSOP Finance Concurrence at this time.</div>' } };
+
+            $('#tableMaster').DataTable(dtConfig);
+            $('#tableMSOP').DataTable(msopDtConfig);
+            $('#tableSOR').DataTable(dtConfig);
+            
+            drawCharts(totalSavings, grandPayable);
+        }
+
+        function drawCharts(totalSavings, finalProposed) {
+            if(chartInstances.schedule) chartInstances.schedule.destroy();
+            if(chartInstances.savings) chartInstances.savings.destroy();
+
+            let labels = [], origData = [], propData = [];
+            summaryData.forEach(s => {
+                if(s.sch !== "GRAND TOTAL") {
+                    labels.push(s.sch);
+                    origData.push(s.orig);
+                    propData.push(s.pay);
+                }
+            });
+
+            chartInstances.schedule = new Chart(document.getElementById('scheduleChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Original CA Value (₹)', data: origData, backgroundColor: '#4a69bd', borderRadius: 4 },
+                        { label: 'Proposed Final Value (₹)', data: propData, backgroundColor: '#079992', borderRadius: 4 }
+                    ]
+                },
+                options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            chartInstances.savings = new Chart(document.getElementById('savingsChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Actual Payout', 'Savings via Rate Penalties'],
+                    datasets: [{ data: [finalProposed, totalSavings], backgroundColor: ['#20bf55', '#a55eea'], hoverOffset: 4 }]
+                },
+                options: { maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        // --- STRICT AI SCOPE ANALYSIS ENGINE ---
+        async function runAIAnalysis() {
+            const apiKey = document.getElementById('geminiApiKey').value.trim();
+            if (!apiKey) return alert("Please enter a valid Google Gemini API Key.");
+
+            const workName = document.getElementById('workName').value.trim();
+            const pdfFile = document.getElementById('workPdf').files[0];
+            const similarFile = document.getElementById('similarExcel').files[0];
+
+            document.getElementById('aiLoading').classList.remove('hidden');
+            document.getElementById('aiResult').innerHTML = "";
+
+            let similarDataText = "No similar work sheet provided.";
+            if (similarFile) {
+                try {
+                    const arrBuf = await similarFile.arrayBuffer();
+                    const wb = XLSX.read(new Uint8Array(arrBuf), {type: 'array'});
+                    const simJson = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval: ""});
+                    
+                    let simArr = simJson.map(r => {
+                        let item = getVal(r, ['Item No.', 'Item No', 'Item_No']) || 'N/A';
+                        let desc = (getVal(r, ['Item Desc.', 'Description', 'Desc']) || '').substring(0, 50);
+                        let qty = parseNumber(getVal(r, ['Qty', 'Quantity', 'Proposed QTY.', 'Executed Qty']));
+                        let rate = parseNumber(getVal(r, ['Rate', 'Agreement Rate', 'Base Rate']));
+                        return `Item: ${item} | Desc: ${desc} | Qty: ${qty} | Rate: ${rate}`;
+                    });
+                    similarDataText = simArr.join('\n');
+                } catch(e) {
+                    similarDataText = "Error parsing similar work sheet.";
+                }
+            }
+
+            let currentItemsText = processedData.map(d => {
+                let desc = (getVal(d, ['Item Desc.', 'Description', 'Desc']) || '').substring(0, 50);
+                let rate = d._rate || 0;
+                return `Item: ${d._processed.itemNo} | Desc: ${desc} | Orig Qty: ${d._processed.origQty} | Prop Qty: ${d._processed.propQty} | Rate: ${rate}`;
+            }).join('\n');
+
+            const prompt = `Act as an expert Indian Railways Contract variation auditor analyzing a variation statement for the IRWCMS tool.
+
+Name of Work: ${workName || 'Not specified'}
+
+Current Proposed Variation Items:
+${currentItemsText}
+
+Similar Work Items (for comparison):
+${similarDataText}
+
+Based ONLY on the provided Name of Work, the attached Work Details PDF (if any), the Current Proposed Variation Items, and Similar Work Items, perform EXACTLY AND ONLY the following analysis:
+1. Exceptionally High Quantities: Identify whether the quantity proposed for any item is exceptionally high.
+2. Irrelevant Items: Identify whether any item is irrelevant to the scope of work.
+3. Linked Items: Identify whether the proposed quantity of any item is linked to another item which needs to be reviewed.
+4. Scope of Work Alignment: State clearly whether the whole proposed variation is as per the scope of work.
+5. Similar Work Comparison (if data is provided): Compare the scope and required items, calculate the per unit cost, and highlight the differences.
+
+Strict Instruction: Do NOT furnish any other analysis, compliance advice, financial summaries, or data. Address ONLY the 5 points requested above.`;
+
+            let contents = [{ parts: [{ text: prompt }] }];
+
+            if (pdfFile) {
+                try {
+                    const base64Pdf = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(pdfFile);
+                    });
+                    contents[0].parts.push({
+                        inlineData: {
+                            mimeType: "application/pdf",
+                            data: base64Pdf
+                        }
+                    });
+                } catch(e) {
+                    console.error("Error reading PDF:", e);
+                }
+            }
+
+            const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-3.6-flash'];
+            let success = false;
+            let lastError = "";
+
+            for (let model of modelsToTry) {
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ contents: contents })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.error) {
+                        lastError = result.error.message;
+                        continue; 
+                    }
+                    
+                    let text = result.candidates[0].content.parts[0].text;
+                    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    document.getElementById('aiResult').innerHTML = text; 
+                    success = true;
+                    break;
+                } catch (error) {
+                    lastError = error.message;
+                }
+            }
+
+            if (!success) {
+                document.getElementById('aiResult').innerHTML = `<span class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation me-2"></i> Error generating AI report: ${lastError}. Ensure your API key is valid and has access to current Gemini models.</span>`;
+            }
+            
+            document.getElementById('aiLoading').classList.add('hidden');
+        }
+
+        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+            $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+        });
+
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            let exp = processedData.map(d => {
+                let r = { ...d };
+                let p = d._processed;
+                r["IRWCMS_Pro_Category"] = p.cat;
+                r["IRWCMS_Pro_Variation"] = p.varStr;
+                r["IRWCMS_Pro_Red_Slab"] = p.redSlab;
+                r["IRWCMS_Pro_Orig_Amount"] = p.origAmt.toFixed(2);
+                r["IRWCMS_Pro_Last_Var_Amount"] = p.lastAmt.toFixed(2);
+                r["IRWCMS_Pro_Final_Payable"] = p.payAmt.toFixed(2);
+                r["IRWCMS_Pro_FC_Status"] = p.fc;
+                delete r._processed; delete r._isGroup; delete r._groupId; delete r._originalQtyRaw; 
+                delete r._executedQty; delete r._lastVariationQty; delete r._rate; delete r._itemNoStr;
+                delete r._Base_Qty_For_Variation; delete r._User_Overridden_Orig_Qty; delete r._type; delete r._sch;
+                delete r._unitDivisor; delete r._rawRate; delete r._sheetOrigAmt; delete r._sheetPropAmt; delete r._sheetLastAmt; delete r._trueRate; delete r._sign; delete r._baseAmtForSlabs; delete r._propAmtRaw; delete r._lastAmtRaw; delete r._isFirstTimeNewItem; delete r._effLastQty; delete r._baseQty; delete r._origAmtPure;
+                return r;
+            });
+            let ws = XLSX.utils.json_to_sheet(exp);
+            
+            let summaryAOA = [ [], [], ["SCHEDULE SUMMARY", "", "", "", "", "", "", ""] ];
+            summaryAOA.push(["Schedule", "Original Agreement Amount", "Last Variation Amount", "Proposed Amount (No Rate Reduction)", "Amount After Rate Reduction", "Var % from Orig", "Var % from Last Var", "Var % (After Red) from Orig"]);
+            summaryData.forEach(s => summaryAOA.push([s.sch, s.orig, s.last, s.prop, s.pay, s.vOrig, s.vLast, s.vRed]));
+            
+            XLSX.utils.sheet_add_aoa(ws, summaryAOA, {origin: -1});
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Audited Data");
+            XLSX.writeFile(wb, "IRWCMS_Pro_Analytics_Export.xlsx");
+        });
+
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) { e.preventDefault(); }
+            if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); }
+        });
+    </script>
+</body>
+</html>
